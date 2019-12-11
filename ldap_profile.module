@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\Mapping;
 
 /**
@@ -24,6 +25,44 @@ function ldap_profile_ldap_user_attributes_alter(&$attributes, &$params) {
         'ldap_user',
         'ldap_user'
       );
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Disable fields in profile form that are synced with LDAP
+ */
+function ldap_profile_form_profile_profile_edit_form_alter(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('ldap_user.settings');
+  $field_provider = \Drupal::service('ldap_user.field_provider');
+  $user_processor = \Drupal::service('ldap.drupal_user_processor');
+
+  if ($config->get('drupalAcctProvisionServer')) {
+    $server = \Drupal::entityTypeManager()->getStorage('ldap_server')->load($config->get('drupalAcctProvisionServer'));
+    $field_provider->loadAttributes($user_processor::PROVISION_TO_DRUPAL, $server);
+  }
+
+  $event = $user_processor::EVENT_SYNC_TO_DRUPAL_USER;
+  $mappings = $field_provider->getConfigurableAttributesSyncedOnEvent($event);
+
+  $fields = [];
+
+  foreach ($mappings as $key => $mapping) {
+    $field = explode('.', substr($key, 1, -1));
+    if (count($field) == 2) {
+      $entity_type = $field[0];
+      $field_name = $field[1];
+
+      $fields[$entity_type][] = $field_name;
+    }
+  }
+
+
+  if (array_key_exists('profile', $fields)) {
+    foreach ($fields['profile'] as $field_name) {
+      $form[$field_name]['#disabled'] = TRUE;
     }
   }
 }
