@@ -1,0 +1,8 @@
+name: 'LDAP Profile Integration'
+description: 'Module for LDAP identified users. Extend mapping to profile fields'
+type: module
+core: 8.x
+package: 'Lightweight Directory Access Protocol'
+dependencies:
+  - ldap:ldap_user
+
