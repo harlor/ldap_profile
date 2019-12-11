@@ -1,0 +1,6 @@
+services:
+   ldap_profile.sync_profile:
+    class: Drupal\ldap_profile\EventSubscriber\LdapProfileSyncSubscriber
+    arguments: ['@config.factory', '@ldap.user_manager', '@entity_type.manager', '@ldap.detail_log', '@ldap_user.field_provider', '@ldap.drupal_user_processor', '@ldap.token_processor']
+    tags:
+      - { name: event_subscriber }
