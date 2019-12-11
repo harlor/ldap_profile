@@ -1,0 +1,29 @@
+<?php
+
+use Drupal\ldap_servers\Mapping;
+
+/**
+ * Implements hook_ldap_user_attributes_alter()
+ *
+ * Add profile fields to ldap Drupal mappings.
+ */
+function ldap_profile_ldap_user_attributes_alter(&$attributes, &$params) {
+
+  $entityFieldManager = \Drupal::getContainer()->get('entity_field.manager');
+  $profile_fields = $entityFieldManager->getFieldStorageDefinitions('profile');
+
+  foreach ($profile_fields as $field_name => $field_instance) {
+    $field_id = sprintf("[profile.%s]", $field_name);
+    if (!array_key_exists($field_id, $attributes)) {
+      $attributes[$field_id] = new Mapping(
+        $field_id,
+        t('Field: @label', ['@label' => $field_instance->getLabel()]),
+        TRUE,
+        FALSE,
+        [],
+        'ldap_user',
+        'ldap_user'
+      );
+    }
+  }
+}
