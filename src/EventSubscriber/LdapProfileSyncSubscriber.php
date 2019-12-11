@@ -131,11 +131,11 @@ class LdapProfileSyncSubscriber implements EventSubscriberInterface {
 
       foreach ($mappings as $key => $mapping) {
         $value = $this->tokenProcessor->ldapEntryReplacementsForDrupalAccount($ldapEntry, $mapping->getLdapAttribute());
-        // The ordinal $value_instance is not used and could probably be
-        // removed.
-        list($value_type, $field_name) = $this->parseUserAttributeNames($key);
 
-        if ($value_type == 'profile') {
+	// Extract $entity_type and $field_name from $key
+	list($entity_type, $field_name) = $this->parseUserAttributeNames($key);
+
+        if ($entity_type == 'profile') {
           /** @var \Drupal\profile\Entity\ProfileInterface[] $profiles */
           $profiles = $this->entityTypeManager->getStorage('profile')
             ->loadByProperties([
